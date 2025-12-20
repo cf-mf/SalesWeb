@@ -25,6 +25,7 @@ namespace SalesWeb.Data
 
             using (var transaction = _context.Database.BeginTransaction())
             {
+                // Necessário por definir id manualmente abaixo.
                 _context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Department ON");
 
                 Department d1 = new Department(1, "Computers");
