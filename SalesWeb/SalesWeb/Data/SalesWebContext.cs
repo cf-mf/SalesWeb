@@ -17,5 +17,17 @@ namespace SalesWeb.Data
         public DbSet<Department> Department { get; set; }
         public DbSet<Seller> Seller { get; set; }
         public DbSet<SalesRecord> SalesRecord { get; set; }
+
+        //Retira o relacionamento em cascata do banco (isso evitar deleções acidentais)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
+                     .SelectMany(e => e.GetForeignKeys()))
+            {
+                foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
