@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SalesWeb.Services;
+using NuGet.Protocol.Plugins;
 using SalesWeb.Models;
 using SalesWeb.Models.ViewModels;
+using SalesWeb.Services;
 using SalesWeb.Services.Exceptions;
 using System.Diagnostics;
 
@@ -33,9 +34,15 @@ namespace SalesWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(SellerFormViewModel viewModel)
+        public IActionResult Create(Seller seller)
         {
-            _sellerService.Insert(viewModel.Seller);
+            if (!ModelState.IsValid)
+            {
+                var department = _departmentService.FindAll();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = department };
+                return View(viewModel);
+            }
+            _sellerService.Insert(seller);
             return RedirectToAction(nameof(Index));
         }
 
@@ -86,10 +93,11 @@ namespace SalesWeb.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
             var obj = _sellerService.FindById(id.Value);
-            if (id == null)
+            if (obj == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
+
 
             List<Department> departments = _departmentService.FindAll();
             SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
@@ -100,6 +108,12 @@ namespace SalesWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Seller seller)
         {
+            if (!ModelState.IsValid)
+            {
+                var department = _departmentService.FindAll();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = department };
+                return View(viewModel);
+            }
             if (id != seller.Id)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id mismatch" });
